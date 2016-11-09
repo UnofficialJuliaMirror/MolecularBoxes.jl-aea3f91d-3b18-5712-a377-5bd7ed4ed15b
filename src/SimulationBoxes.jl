@@ -2,8 +2,9 @@ module SimulationBoxes
 
 export SimulationBox, Box
 export getorigin, getvectors, getdiagonal
+export setorigin
 export isperiodic
-export wrap, unwrap, separation
+export wrap, wrap!, unwrap, separation
 
 """
 SimulationBox has three type parameters:
@@ -21,6 +22,8 @@ abstract SimulationBox{V,N,P}
 
 @inline isperiodic{V,N,P}(b::SimulationBox{V,N,P}) = P
 @inline isperiodic{V,N,P}(b::SimulationBox{V,N,P}, dim) = P[dim]
+
+@inline Base.eltype{V}(::SimulationBox{V}) = V
 
 immutable Box{V,N,P} <: SimulationBox{V,N,P}
     origin::V
@@ -71,6 +74,10 @@ function Box{V}(sides::V, origin::V=zero(V),
     Box{V,N,(periodic...)}((vectors...), origin)
 end
 
+function setorigin{V,N,P}(box::Box{V,N,P}, origin::V)
+    Box{V,N,P}(getvectors(box), origin)
+end
+
 @inline getorigin(box::Box) = box.origin
 @inline getvectors(box::Box) = box.vectors
 @inline function getdiagonal{V,N}(box::SimulationBox{V,N}) :: V 
@@ -81,7 +88,8 @@ end
 
 @inline _wrap{V}(x::V, origin::V, vector::V, dim::Integer, p::Type{Val{false}}) = x,0
 
-@inline function _wrap{V}(x::V, origin::V, vector::V, dim::Integer, p::Type{Val{true}}) 
+@inline function _wrap{V}(x::V, origin::V, vector::V, dim::Integer,
+                          p::Type{Val{true}})
     image, x0 = divrem(x[dim]-origin[dim], vector[dim])
     image -= ifelse(x0<0, 1, 0)
     x - image*vector, convert(Int, image)
@@ -104,6 +112,13 @@ Base.convert{N,T}(::Type{Vector{T}}, x::NTuple{N,T}) = collect(x)
         $(lines...)
         x,( $(images...), )
     end
+end
+
+function wrap!{V}(x::Vector{V}, box::SimulationBox{V})
+    for i in eachindex(x)
+        x[i],_ = wrap(x[i], box)
+    end
+    x
 end
 
 function unwrap{V,N}(x::V, image, box::SimulationBox{V,N}) :: V
