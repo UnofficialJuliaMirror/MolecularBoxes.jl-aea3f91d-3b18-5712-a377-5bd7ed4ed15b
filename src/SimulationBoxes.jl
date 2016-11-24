@@ -5,6 +5,7 @@ export getorigin, getvectors, getdiagonal
 export setorigin
 export isperiodic
 export wrap, wrap!, unwrap, separation
+export centerofmass
 
 """
 SimulationBox has three type parameters:
@@ -19,6 +20,8 @@ must implement 3 functions: origin(::Box), vectors(::Box),
  si(::Box)
 """
 abstract SimulationBox{V,N,P}
+
+include("center_of_mass.jl")
 
 @inline isperiodic{V,N,P}(b::SimulationBox{V,N,P}) = P
 @inline isperiodic{V,N,P}(b::SimulationBox{V,N,P}, dim) = P[dim]
