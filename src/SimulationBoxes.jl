@@ -89,10 +89,21 @@ end
 end
 @inline getdiagonal(box::Box) = box.diagonal
 
-@inline _wrap{V}(x::V, origin::V, vector::V, dim::Integer, p::Type{Val{false}}) = x,0
+@inline _wrap{V}(
+        x::V,
+        origin::V,
+        vector::V,
+        dim::Integer,
+        p::Type{Val{false}},
+        ) = x, 0
 
-@inline function _wrap{V}(x::V, origin::V, vector::V, dim::Integer,
-                          p::Type{Val{true}})
+@inline function _wrap{V}(
+        x::V,
+        origin::V,
+        vector::V,
+        dim::Integer,
+        p::Type{Val{true}},
+        ) ::Tuple{V,Int}
     image, x0 = divrem(x[dim]-origin[dim], vector[dim])
     image -= ifelse(x0<0, 1, 0)
     x - image*vector, convert(Int, image)
