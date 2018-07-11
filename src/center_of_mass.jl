@@ -1,8 +1,9 @@
 
-function centerofmass{T}(pos::Vector{T},
+function centerofmass(pos::Vector{T},
                          lo::T,
                          L::T,
-                         weight::Vector{Float64} = ones(Float64,length(pos)))
+                         weight::Vector{Float64} = ones(Float64,length(pos))
+                        ) where T
     if length(pos)==1 ; return pos[1] ; end
     
     length(weight) == length(pos) || error("Weights and positions mismatch")
@@ -15,13 +16,13 @@ function centerofmass{T}(pos::Vector{T},
 
     for i in eachindex(pos)
         t = (pos[i]-lo)./L*2pi 
-        a -= cos(t) * weight[i]
-        b -= sin(t) * weight[i]
+        a -= cos.(t) * weight[i]
+        b -= sin.(t) * weight[i]
     end
     a = a*invtotweight
     b = b*invtotweight
 
-    tcom = atan2(b,a)+pi
+    tcom = atan.(b,a)+pi
     com = tcom.*i2pi.*L + lo
 end
 

@@ -19,20 +19,20 @@ Concrete types inheriting from SimulationBox
 must implement 3 functions: origin(::Box), vectors(::Box),
  si(::Box)
 """
-abstract SimulationBox{V,N,P}
+abstract type SimulationBox{V,N,P} end
 
 include("center_of_mass.jl")
 
-@inline isperiodic{V,N,P}(b::SimulationBox{V,N,P}) = P
-@inline isperiodic{V,N,P}(b::SimulationBox{V,N,P}, dim) = P[dim]
+@inline isperiodic(b::SimulationBox{V,N,P}) where {V,N,P} = P
+@inline isperiodic(b::SimulationBox{V,N,P}, dim) where {V,N,P} = P[dim]
 
-@inline Base.eltype{V}(::SimulationBox{V}) = V
+@inline Base.eltype(::SimulationBox{V}) where V = V
 
-immutable Box{V,N,P} <: SimulationBox{V,N,P}
+struct Box{V,N,P} <: SimulationBox{V,N,P}
     origin::V
     vectors::NTuple{N,V}
     diagonal::V
-    function Box(vectors::NTuple{N,V}, origin = zero(V))
+    function Box{V,N,P}(vectors::NTuple{N,V}, origin = zero(V)) where {N,V,P}
         if !isa(N,Integer)
             error("N parameter of a SimulationBox must be an Integer")
         end
@@ -66,52 +66,52 @@ immutable Box{V,N,P} <: SimulationBox{V,N,P}
     end
 end
 
-function Box{V}(sides::V, origin::V=zero(V),
-                  periodic=( (true for x in 1:length(sides))... )) 
+function Box(sides::V, origin::V=zero(V),
+                  periodic=( (true for x in 1:length(sides))..., )) where V
     N = length(sides)
     vectors = map( (i,L)-> begin 
         v = zeros(eltype(V), N)
         v[i] = L
         convert(V,v)
     end, 1:N, sides)
-    Box{V,N,(periodic...)}((vectors...), origin)
+    Box{V,N,(periodic...,)}((vectors...,), origin)
 end
 
-function setorigin{V,N,P}(box::Box{V,N,P}, origin::V)
+function setorigin(box::Box{V,N,P}, origin::V) where {V,N,P}
     Box{V,N,P}(getvectors(box), origin)
 end
 
 @inline getorigin(box::Box) = box.origin
 @inline getvectors(box::Box) = box.vectors
-@inline function getdiagonal{V,N}(box::SimulationBox{V,N}) :: V 
+@inline function getdiagonal(box::SimulationBox{V,N}) :: V where {V,N}
     v = vectors(box)
     collect( v[i][i] for i in 1:N )
 end
 @inline getdiagonal(box::Box) = box.diagonal
 
-@inline _wrap{V}(
+@inline _wrap(
         x::V,
         origin::V,
         vector::V,
         dim::Integer,
         p::Type{Val{false}},
-        ) = x, 0
+        ) where V = x, 0
 
-@inline function _wrap{V}(
+@inline function _wrap(
         x::V,
         origin::V,
         vector::V,
         dim::Integer,
         p::Type{Val{true}},
-        ) ::Tuple{V,Int}
+        ) ::Tuple{V,Int} where V
     image, x0 = divrem(x[dim]-origin[dim], vector[dim])
     image -= ifelse(x0<0, 1, 0)
     x - image*vector, convert(Int, image)
 end
 
-Base.convert{N,T}(::Type{Vector{T}}, x::NTuple{N,T}) = collect(x)
+Base.convert(::Type{Vector{T}}, x::NTuple{N,T}) where {N,T} = collect(x)
 
-@generated function wrap{V,N,P}(x::V, box::SimulationBox{V,N,P})
+@generated function wrap(x::V, box::SimulationBox{V,N,P}) where {V,N,P}
     lines = Expr[]
     images = [ Symbol("img$i") for i in 1:N ]
     for i in 1:N
@@ -128,14 +128,14 @@ Base.convert{N,T}(::Type{Vector{T}}, x::NTuple{N,T}) = collect(x)
     end
 end
 
-function wrap!{V}(x::Vector{V}, box::SimulationBox{V})
+function wrap!(x::Vector{V}, box::SimulationBox{V}) where V
     for i in eachindex(x)
         x[i],_ = wrap(x[i], box)
     end
     x
 end
 
-function unwrap{V,N}(x::V, image, box::SimulationBox{V,N}) :: V
+function unwrap(x::V, image, box::SimulationBox{V,N}) :: V where {V,N}
     if length(image) != N
         throw(DimensionMismatch("image argument wrong length"))
     end
@@ -169,8 +169,8 @@ unwrap
                  ifelse(r<-hdiag, diagonal, zero(diagonal)))
 end
 
-@generated function separation{V,N,P}(x1::V, x2::V,
-                                      box::SimulationBox{V,N,P})
+@generated function separation(x1::V, x2::V,
+                               box::SimulationBox{V,N,P}) where {V,N,P}
     args = [:(_separation(x1[$i],
                           x2[$i],
                           origin[$i],
