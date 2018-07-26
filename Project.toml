@@ -1,6 +1,4 @@
-authors = ["Tom Lee <contact@tomlee.com.au>"]
 name = "SimulationBoxes"
 uuid = "bfdac0e2-856b-11e8-2054-fde3304e454a"
-version = "1.0.0"
-
-[deps]
+authors = ["Tom Lee <contact@tomlee.com.au>"]
+version = "1.0.1"
