@@ -15,7 +15,7 @@ SimulationBox has three type parameters:
     * P: A tuple of booleans indicating which dimensions are periodic
 
 Concrete types inheriting from SimulationBox
-must implement 2 fields: vectors and diagonal
+must implement 2 fields: vectors and lengths
  si(::Box)
 """
 abstract type SimulationBox{V,N,P} end
@@ -29,7 +29,7 @@ include("center_of_mass.jl")
 
 struct Box{V,N,P} <: SimulationBox{V,N,P}
     vectors::NTuple{N,V}
-    diagonal::V
+    lengths::V
     function Box{V,N,P}(vectors::NTuple{N,V}) where {N,V,P}
         if !isa(N,Integer)
             error("N parameter of a SimulationBox must be an Integer")
@@ -53,21 +53,21 @@ struct Box{V,N,P} <: SimulationBox{V,N,P}
                 end
             end
         end
-        diagonal = convert(V, collect(vectors[i][i] for i in 1:N) )
-        new{V,N,P}(vectors, diagonal)
+        lengths = convert(V, collect(vectors[i][i] for i in 1:N) )
+        new{V,N,P}(vectors, lengths)
     end
 end
 
 function Box(
-    sides::V,
-    periodic=( (true for x in 1:length(sides))..., )
+    lengths::V,
+    periodic=( (true for x in 1:length(lengths))..., )
 ) where V
-    N = length(sides)
+    N = length(lengths)
     vectors = map( (i,L)-> begin 
         v = zeros(eltype(V), N)
         v[i] = L
         convert(V,v)
-    end, 1:N, sides)
+    end, 1:N, lengths)
     Box{V,N,(periodic...,)}((vectors...,))
 end
 
@@ -132,24 +132,24 @@ unwrap
 
 @inline _separation(x1::Real,
                    x2::Real,
-                   diagonal::Real,
+                   lengths::Real,
                    periodic::Type{Val{false}}) = x2-x1
 
 @inline function _separation(x1::Real,
                             x2::Real,
-                            diagonal::Real,
+                            lengths::Real,
                             periodic::Type{Val{true}})
     r = x1-x2
-    hdiag = 0.5diagonal
-    r + ifelse(r>hdiag, -diagonal,
-                 ifelse(r<-hdiag, diagonal, zero(diagonal)))
+    hlen = 0.5lengths
+    r + ifelse(r>hlen, -lengths,
+                 ifelse(r<-hlen, lengths, zero(lengths)))
 end
 
 @generated function separation(x1::V, x2::V,
                                box::SimulationBox{V,N,P}) where {V,N,P}
     args = [:(_separation(x1[$i],
                           x2[$i],
-                          box.diagonal[$i],
+                          box.lengths[$i],
                           Val{$(P[i])}))
             for i in 1:N ]
     meta = Expr(:meta, :inline)
