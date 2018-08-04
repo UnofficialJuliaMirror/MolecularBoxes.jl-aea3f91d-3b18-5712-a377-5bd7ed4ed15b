@@ -56,17 +56,6 @@ v2 = lengths+Vec(-0.5,-1,-1)
     @test box.lengths == lengths
 end
 
-@testset "Test wrapping and unwrapping" begin
-    @test wrap(v,box) == (Vec(2,3,3),(-1,0,1))
-    @test wrap(v1,box) == (v1,(0,0,0))
-    @test wrap(zero(Vec),box) == (zero(Vec),(0,0,0))
-    @test wrap(lengths,box) == (zero(Vec),(1,1,1))
-    for img in ((0,2,4), [0,2,4], Vec(0,2,4))
-        @test unwrap(v1, img, box) == Vec(0.5, 9, 21)
-        @test unwrap(v1, img, boxpfp) == Vec(0.5, 9, 21)
-    end
-end
-
 @testset "Test separation" begin
     @test separation(v1,v2,box) == Vec(1,-2,2)
     #@pending separation(need,more,tests) --> Vec(x,x,x)
