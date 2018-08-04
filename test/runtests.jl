@@ -1,16 +1,13 @@
-include("../src/SimulationBoxes.jl")
 
-module TestSimulationBoxes
-
-using Base.Test
 using SimulationBoxes
-import FixedSizeArrays
+
+using Test
+using StaticArrays
 
 #a 3D vector for testing
-typealias Vec FixedSizeArrays.Vec{3,Float64}
+const Vec = SVector{3,Float64}
 
-typealias BoxV Box{Vec,3,(true,true,true)}
-typealias BoxA Box{Vector{Float64},3,(true,true,true)}
+const BoxV =  Box{Vec,3,(true,true,true)}
 
 @testset "Test Box constructor" begin
     origin = Vec(0,1,2)
@@ -51,43 +48,36 @@ end
     @test getdiagonal(box) == convert(Vec, collect(vectors[i][i] for i in 1:3) )
 end
 
-vectortypes = zip(
-[ (x,y,z) -> Vec(x,y,z), (x,y,z) -> Float64[x,y,z] ],
-[Vec, Vector{Float64}],
-)
 
-@testset "Test function with V=$V" for (makeV,V) in vectortypes
-    origin, sides = makeV(0,1,2), makeV(3,4,5)
-    hi = origin + sides
+origin, sides = Vec(0,1,2), Vec(3,4,5)
+hi = origin + sides
 
-    box = Box(sides, origin, (true,true,true))
-    boxpfp = Box(sides,origin, (true,false,true))
+box = Box(sides, origin, (true,true,true))
+boxpfp = Box(sides,origin, (true,false,true))
 
-    v = makeV(-1,3,8)
-    v1 = origin+makeV(0.5,1,1)
-    v2 = origin+sides+makeV(-0.5,-1,-1)
-    
-    @testset "test dimensions/coordinates access functions" begin
-        @test getorigin(box) == origin
-        @test getdiagonal(box) == sides
+v = Vec(-1,3,8)
+v1 = origin+Vec(0.5,1,1)
+v2 = origin+sides+Vec(-0.5,-1,-1)
+
+@testset "test dimensions/coordinates access functions" begin
+    @test getorigin(box) == origin
+    @test getdiagonal(box) == sides
+end
+
+@testset "Test wrapping and unwrapping" begin
+    @test wrap(v,box) == (Vec(2,3,3),(-1,0,1))
+    @test wrap(v1,box) == (v1,(0,0,0))
+    @test wrap(origin,box) == (origin,(0,0,0))
+    @test wrap(origin+sides,box) == (origin,(1,1,1))
+    for img in ((0,2,4), [0,2,4], Vec(0,2,4))
+        @test unwrap(v1, img, box) == Vec(0.5, 10, 23)
+        @test unwrap(v1, img, boxpfp) == Vec(0.5, 10, 23)
     end
-    
-    @testset "Test wrapping and unwrapping" begin
-        @test wrap(v,box) == (makeV(2,3,3),(-1,0,1))
-        @test wrap(v1,box) == (v1,(0,0,0))
-        @test wrap(origin,box) == (origin,(0,0,0))
-        @test wrap(origin+sides,box) == (origin,(1,1,1))
-        for img in ((0,2,4), [0,2,4], makeV(0,2,4))
-            @test unwrap(v1, img, box) == makeV(0.5, 10, 23)
-            @test unwrap(v1, img, boxpfp) == makeV(0.5, 10, 23)
-        end
-    end
-    
-    @testset "Test separation" begin
-        @test separation(v1,v2,box) == makeV(1,-2,2)
-        #@pending separation(need,more,tests) --> makeV(x,x,x)
-    end
+end
+
+@testset "Test separation" begin
+    @test separation(v1,v2,box) == Vec(1,-2,2)
+    #@pending separation(need,more,tests) --> Vec(x,x,x)
+end
    
-end
 
-end
