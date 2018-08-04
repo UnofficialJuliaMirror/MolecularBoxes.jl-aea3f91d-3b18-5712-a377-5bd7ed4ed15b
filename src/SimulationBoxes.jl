@@ -99,7 +99,7 @@ end
     end
 end
 
-function separation(
+@inline function separation(
     x1,
     x2,
     box::SimulationBox{V,N,P},
@@ -107,12 +107,6 @@ function separation(
     _separation.(x1, x2, box.lengths, SVector(P))
 end
 
-"""
-separation{V,N::Int,P::Tuple{Vararg{Bool}}}(v1::V, v2::V, box::SimulationBox{V,N,P})
-      -> returns a vector of type V corresponding to v1-v2
-         taking into account periodic boundaries using the
-         nearest image convention, assuming v1 and v2 are in the central box.
-"""
 separation
 
 
