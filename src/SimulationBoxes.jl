@@ -6,6 +6,8 @@ export isperiodic
 export wrap, wrap!, unwrap, separation
 export centerofmass
 
+using StaticArrays
+
 """
 SimulationBox has three type parameters:
     * V: An immutable vector-like type with a Base.length(::V) method
@@ -129,34 +131,38 @@ Unwraps periodic boundaries given the coordinate in image 0.
 Does not check for periodic boundaries, which should have an image flag of zero.
 """
 unwrap
+@inline _separation(
+    x1,
+    x2,
+    length,
+    periodic::Bool,
+) = _separation(x1, x2, length, Val{periodic})
 
-@inline _separation(x1::Real,
-                   x2::Real,
-                   lengths::Real,
-                   periodic::Type{Val{false}}) = x2-x1
-
-@inline function _separation(x1::Real,
-                            x2::Real,
-                            lengths::Real,
-                            periodic::Type{Val{true}})
+@inline function _separation(
+    x1,
+    x2,
+    length,
+    periodic::Type{Val{P}},
+) where {P} 
     r = x1-x2
-    hlen = 0.5lengths
-    r + ifelse(r>hlen, -lengths,
-                 ifelse(r<-hlen, lengths, zero(lengths)))
+    if P
+        hlen = 0.5length
+        r + ifelse(
+            r > hlen,
+            -length,
+            ifelse(r < -hlen, length, zero(length)),
+        )
+    else
+        r
+    end
 end
 
-@generated function separation(x1::V, x2::V,
-                               box::SimulationBox{V,N,P}) where {V,N,P}
-    args = [:(_separation(x1[$i],
-                          x2[$i],
-                          box.lengths[$i],
-                          Val{$(P[i])}))
-            for i in 1:N ]
-    meta = Expr(:meta, :inline)
-    quote
-        $meta
-        convert(V, ( ($(args...),) ))
-    end
+function separation(
+    x1,
+    x2,
+    box::SimulationBox{V,N,P},
+) where {V,N,P}
+    _separation.(x1, x2, box.lengths, SVector(P))
 end
 
 """
