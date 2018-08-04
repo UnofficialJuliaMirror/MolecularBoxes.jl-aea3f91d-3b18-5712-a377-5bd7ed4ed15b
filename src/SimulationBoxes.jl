@@ -2,8 +2,7 @@
 module SimulationBoxes
 
 export SimulationBox, Box
-export getorigin, getvectors, getdiagonal
-export setorigin
+export  getvectors, getdiagonal
 export isperiodic
 export wrap, wrap!, unwrap, separation
 export centerofmass
@@ -17,7 +16,7 @@ SimulationBox has three type parameters:
     * P: A tuple of booleans indicating which dimensions are periodic
 
 Concrete types inheriting from SimulationBox
-must implement 3 functions: origin(::Box), vectors(::Box),
+must implement 2 functions: getvectors(::Box),
  si(::Box)
 """
 abstract type SimulationBox{V,N,P} end
@@ -30,22 +29,15 @@ include("center_of_mass.jl")
 @inline Base.eltype(::SimulationBox{V}) where V = V
 
 struct Box{V,N,P} <: SimulationBox{V,N,P}
-    origin::V
     vectors::NTuple{N,V}
     diagonal::V
-    function Box{V,N,P}(vectors::NTuple{N,V}, origin = zero(V)) where {N,V,P}
+    function Box{V,N,P}(vectors::NTuple{N,V}) where {N,V,P}
         if !isa(N,Integer)
             error("N parameter of a SimulationBox must be an Integer")
         end
         if !isa(P,NTuple{N,Bool})
             error(string("P=$P parameter of a `SimulationBox` must be a tuple ",
                          "of `Bool`s, with one `Bool` for each dimension"))
-        end
-        for vec in vectors
-            if !(length(origin)==length(vec)==N)
-                msg = "origin and box vector arguments do not have equal lengths"
-                throw(DimensionMismatch(msg))
-            end
         end
         for i in 1:N
             if vectors[i][i] <=0 
@@ -63,26 +55,23 @@ struct Box{V,N,P} <: SimulationBox{V,N,P}
             end
         end
         diagonal = convert(V, collect(vectors[i][i] for i in 1:N) )
-        new{V,N,P}(origin, vectors, diagonal)
+        new{V,N,P}(vectors, diagonal)
     end
 end
 
-function Box(sides::V, origin::V=zero(V),
-                  periodic=( (true for x in 1:length(sides))..., )) where V
+function Box(
+    sides::V,
+    periodic=( (true for x in 1:length(sides))..., )
+) where V
     N = length(sides)
     vectors = map( (i,L)-> begin 
         v = zeros(eltype(V), N)
         v[i] = L
         convert(V,v)
     end, 1:N, sides)
-    Box{V,N,(periodic...,)}((vectors...,), origin)
+    Box{V,N,(periodic...,)}((vectors...,))
 end
 
-function setorigin(box::Box{V,N,P}, origin::V) where {V,N,P}
-    Box{V,N,P}(getvectors(box), origin)
-end
-
-@inline getorigin(box::Box) = box.origin
 @inline getvectors(box::Box) = box.vectors
 @inline function getdiagonal(box::SimulationBox{V,N}) :: V where {V,N}
     v = vectors(box)
@@ -92,7 +81,6 @@ end
 
 @inline _wrap(
         x::V,
-        origin::V,
         vector::V,
         dim::Integer,
         p::Type{Val{false}},
@@ -100,12 +88,11 @@ end
 
 @inline function _wrap(
         x::V,
-        origin::V,
         vector::V,
         dim::Integer,
         p::Type{Val{true}},
         ) ::Tuple{V,Int} where V
-    image, x0 = divrem(x[dim]-origin[dim], vector[dim])
+    image, x0 = divrem(x[dim], vector[dim])
     image -= ifelse(x0<0, 1, 0)
     x - image*vector, convert(Int, image)
 end
@@ -117,13 +104,13 @@ Base.convert(::Type{Vector{T}}, x::NTuple{N,T}) where {N,T} = collect(x)
     images = [ Symbol("img$i") for i in 1:N ]
     for i in 1:N
         line = quote
-            x, $(images[i]) = _wrap(x, origin, vectors[$i], $i, Val{$(P[i])})
+            x, $(images[i]) = _wrap(x, vectors[$i], $i, Val{$(P[i])})
         end
         push!(lines, line)
     end
     quote
         :(Expr(:meta, :inline))
-        origin, vectors = getorigin(box), getvectors(box)
+        vectors = getvectors(box)
         $(lines...)
         x,( $(images...), )
     end
@@ -155,13 +142,11 @@ unwrap
 
 @inline _separation(x1::Real,
                    x2::Real,
-                   origin::Real,
                    diagonal::Real,
                    periodic::Type{Val{false}}) = x2-x1
 
 @inline function _separation(x1::Real,
                             x2::Real,
-                            origin::Real,
                             diagonal::Real,
                             periodic::Type{Val{true}})
     r = x1-x2
@@ -174,14 +159,13 @@ end
                                box::SimulationBox{V,N,P}) where {V,N,P}
     args = [:(_separation(x1[$i],
                           x2[$i],
-                          origin[$i],
                           diagonal[$i],
                           Val{$(P[i])}))
             for i in 1:N ]
     meta = Expr(:meta, :inline)
     quote
         $meta
-        origin, diagonal = getorigin(box), getdiagonal(box)
+        diagonal = getdiagonal(box)
         convert(V, ( ($(args...),) ))
     end
 end
