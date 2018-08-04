@@ -90,7 +90,7 @@ end
     if P
         hlen = 0.5length
         r + ifelse(
-            r > hlen,
+            r >= hlen,
             -length,
             ifelse(r < -hlen, length, zero(length)),
         )
