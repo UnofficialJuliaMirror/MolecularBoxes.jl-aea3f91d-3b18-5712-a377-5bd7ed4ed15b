@@ -2,7 +2,6 @@
 module SimulationBoxes
 
 export SimulationBox, Box
-export  getvectors, getdiagonal
 export isperiodic
 export wrap, wrap!, unwrap, separation
 export centerofmass
@@ -16,7 +15,7 @@ SimulationBox has three type parameters:
     * P: A tuple of booleans indicating which dimensions are periodic
 
 Concrete types inheriting from SimulationBox
-must implement 2 functions: getvectors(::Box),
+must implement 2 fields: vectors and diagonal
  si(::Box)
 """
 abstract type SimulationBox{V,N,P} end
@@ -72,13 +71,6 @@ function Box(
     Box{V,N,(periodic...,)}((vectors...,))
 end
 
-@inline getvectors(box::Box) = box.vectors
-@inline function getdiagonal(box::SimulationBox{V,N}) :: V where {V,N}
-    v = vectors(box)
-    collect( v[i][i] for i in 1:N )
-end
-@inline getdiagonal(box::Box) = box.diagonal
-
 @inline _wrap(
         x::V,
         vector::V,
@@ -104,13 +96,12 @@ Base.convert(::Type{Vector{T}}, x::NTuple{N,T}) where {N,T} = collect(x)
     images = [ Symbol("img$i") for i in 1:N ]
     for i in 1:N
         line = quote
-            x, $(images[i]) = _wrap(x, vectors[$i], $i, Val{$(P[i])})
+            x, $(images[i]) = _wrap(x, box.vectors[$i], $i, Val{$(P[i])})
         end
         push!(lines, line)
     end
     quote
         :(Expr(:meta, :inline))
-        vectors = getvectors(box)
         $(lines...)
         x,( $(images...), )
     end
@@ -130,8 +121,7 @@ function unwrap(x::V, image, box::SimulationBox{V,N}) :: V where {V,N}
     if length(x) != N
         throw(DimensionMismatch("x argument wrong length"))
     end
-    vectors = getvectors(box)
-    x + sum( vectors[i] * image[i] for i in 1:N )
+    x + sum( box.vectors[i] * image[i] for i in 1:N )
 end
 
 """
@@ -159,13 +149,12 @@ end
                                box::SimulationBox{V,N,P}) where {V,N,P}
     args = [:(_separation(x1[$i],
                           x2[$i],
-                          diagonal[$i],
+                          box.diagonal[$i],
                           Val{$(P[i])}))
             for i in 1:N ]
     meta = Expr(:meta, :inline)
     quote
         $meta
-        diagonal = getdiagonal(box)
         convert(V, ( ($(args...),) ))
     end
 end

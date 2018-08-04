@@ -37,8 +37,8 @@ end
     )
     box = Box{Vec,3,p}(vectors)
     @test isperiodic(box) == p
-    @test getvectors(box) == vectors
-    @test getdiagonal(box) == convert(Vec, collect(vectors[i][i] for i in 1:3) )
+    @test box.vectors == vectors
+    @test box.diagonal == convert(Vec, collect(vectors[i][i] for i in 1:3) )
 end
 
 
@@ -53,7 +53,7 @@ v1 = Vec(0.5,1,1)
 v2 = sides+Vec(-0.5,-1,-1)
 
 @testset "test dimensions/coordinates access functions" begin
-    @test getdiagonal(box) == sides
+    @test box.diagonal == sides
 end
 
 @testset "Test wrapping and unwrapping" begin
