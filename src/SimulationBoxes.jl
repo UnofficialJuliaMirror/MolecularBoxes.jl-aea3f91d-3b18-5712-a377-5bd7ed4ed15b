@@ -91,8 +91,6 @@ end
     x - image*vector, convert(Int, image)
 end
 
-Base.convert(::Type{Vector{T}}, x::NTuple{N,T}) where {N,T} = collect(x)
-
 @generated function wrap(x::V, box::SimulationBox{V,N,P}) where {V,N,P}
     lines = Expr[]
     images = [ Symbol("img$i") for i in 1:N ]
