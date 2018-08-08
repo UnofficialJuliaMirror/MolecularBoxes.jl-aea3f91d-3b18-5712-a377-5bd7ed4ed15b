@@ -1,16 +1,20 @@
 
 function center_of_mass(
     pos::Vector{T},
-    box::SimulationBox{T},
-    weight = ones(Float64,length(pos))
-) where T
+    box::SimulationBox{T,N,P};
+    weights = ones(Float64,length(pos))
+) where {T,N,P}
+    if sum(P) != N
+        error("Calculating the center of mass is currently only supported for"*
+            "fully-periodic systems")
+    end
     if length(pos)==1 ; return pos[1] ; end
 
     L = box.lengths
     
-    length(weight) == length(pos) || error("Weights and positions mismatch")
+    length(weights) == length(pos) || error("Weights and positions mismatch")
     
-    invtotweight = 1.0/sum(weight)
+    invtotweight = 1.0/sum(weights)
     i2pi = 0.5/pi
     
     a = zero(eltype(pos))
@@ -18,8 +22,8 @@ function center_of_mass(
 
     for i in eachindex(pos)
         t = pos[i]./L*2pi 
-        a -= cos.(t) * weight[i]
-        b -= sin.(t) * weight[i]
+        a -= cos.(t) * weights[i]
+        b -= sin.(t) * weights[i]
     end
     a = a*invtotweight
     b = b*invtotweight

@@ -60,7 +60,7 @@ struct Box{V,N,P} <: SimulationBox{V,N,P}
 end
 
 function Box(
-    lengths::V,
+    lengths::V;
     periodic=( (true for x in 1:length(lengths))..., )
 ) where V
     N = length(lengths)
