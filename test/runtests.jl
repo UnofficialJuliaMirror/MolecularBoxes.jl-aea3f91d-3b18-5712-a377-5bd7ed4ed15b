@@ -60,5 +60,9 @@ end
     @test separation(v1,v2,box) == Vec(1,-2,2)
     #@pending separation(need,more,tests) --> Vec(x,x,x)
 end
+
+@testset "Test centre-of-mass calculation" begin
+    @test center_of_mass([v1,v2], box) == Vec(3,2,5)
+end
    
 

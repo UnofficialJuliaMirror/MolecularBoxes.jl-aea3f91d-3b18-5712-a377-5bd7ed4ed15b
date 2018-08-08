@@ -4,7 +4,7 @@ module SimulationBoxes
 export SimulationBox, Box
 export isperiodic
 export wrap, wrap!, unwrap, separation
-export centerofmass
+export center_of_mass
 
 using StaticArrays
 
