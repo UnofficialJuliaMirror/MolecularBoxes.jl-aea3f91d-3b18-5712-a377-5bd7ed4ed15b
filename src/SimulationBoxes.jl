@@ -10,9 +10,8 @@ using StaticArrays
 
 """
 SimulationBox has three type parameters:
-    * V: An immutable vector-like type with a Base.length(::V) method
-        and a dimfields method returning the names of
-        the fields associated with each dimension
+    * V: An immutable vector such as those implemented in the StaticArrays
+        package
     * N: The number of dimensions
     * P: A tuple of booleans indicating which dimensions are periodic
 
