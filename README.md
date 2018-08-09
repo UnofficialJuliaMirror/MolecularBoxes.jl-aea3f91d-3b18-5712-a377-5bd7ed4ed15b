@@ -1,4 +1,4 @@
-# MolecularBoxes
+# MolecularBoxes.jl
 
 MolecularBoxes provides tools for dealing with periodic boundary conditions 
 when analysing molecular simulations.
