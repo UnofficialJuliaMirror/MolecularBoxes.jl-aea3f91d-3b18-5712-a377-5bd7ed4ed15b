@@ -27,7 +27,7 @@ Box{SArray{Tuple{3},Float64,1,3},3,(true, true, true)}(([3.0, 0.0, 0.0], [0.0, 4
 To get the vector separating two points according to the nearest image 
 convention:
 
-```
+```julia
 julia> v1 = SVector(0.1, 0.2, 0.3)
 3-element SArray{Tuple{3},Float64,1,3}:
  0.1
