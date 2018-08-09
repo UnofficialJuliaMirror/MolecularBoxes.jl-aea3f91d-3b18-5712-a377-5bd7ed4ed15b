@@ -1,7 +1,7 @@
 # MolecularBoxes.jl
 
 [![Build Status](https://travis-ci.org/tom--lee/MolecularBoxes.jl.svg?branch=master)](https://travis-ci.org/tom--lee/MolecularBoxes.jl)
-[![Build status](https://ci.appveyor.com/api/projects/status/me0qunrtt1tledvp?svg=true)](https://ci.appveyor.com/project/tom--lee/MolecularBoxes-jl)
+[![Build status](https://ci.appveyor.com/api/projects/status/vlrr0x55fa52aimf?svg=true)](https://ci.appveyor.com/project/tom--lee/molecularboxes-jl)
 
 
 MolecularBoxes provides tools for dealing with periodic boundary conditions 
