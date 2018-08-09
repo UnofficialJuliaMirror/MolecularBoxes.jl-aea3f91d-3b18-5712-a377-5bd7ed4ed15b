@@ -2,7 +2,7 @@
 module MolecularBoxes
 
 export MolecularBox, Box
-export isperiodic separation center_of_mass
+export isperiodic, separation, center_of_mass
 
 using StaticArrays
 
@@ -86,11 +86,19 @@ end
     r = x1-x2
     if P
         hlen = 0.5length
-        r + ifelse(
-            r >= hlen,
-            -length,
-            ifelse(r < -hlen, length, zero(length)),
-        )
+        while r >= hlen
+            r-=length
+        end
+        while r < -hlen
+            r+=length
+        end
+        # faster but unsafe version:
+#       r + ifelse(
+#           r >= hlen,
+#           -length,
+#           ifelse(r < -hlen, length, zero(length)),
+#       )
+        r
     else
         r
     end
