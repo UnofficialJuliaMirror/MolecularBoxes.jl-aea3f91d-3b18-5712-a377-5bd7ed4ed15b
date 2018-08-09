@@ -1,5 +1,5 @@
 
-using SimulationBoxes
+using MolecularBoxes
 
 using Test
 using StaticArrays

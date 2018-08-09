@@ -1,7 +1,7 @@
 
 function center_of_mass(
     pos::Vector{T},
-    box::SimulationBox{T,N,P};
+    box::MolecularBox{T,N,P};
     weights = ones(Float64,length(pos))
 ) where {T,N,P}
     if sum(P) != N

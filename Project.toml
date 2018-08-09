@@ -1,7 +1,7 @@
-name = "SimulationBoxes"
+name = "MolecularBoxes"
 uuid = "bfdac0e2-856b-11e8-2054-fde3304e454a"
 authors = ["Tom Lee <contact@tomlee.com.au>"]
-version = "2.0.0-DEV"
+version = "1.0.0-DEV"
 
 [deps]
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"

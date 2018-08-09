@@ -1,12 +1,12 @@
-# SimulationBoxes
+# MolecularBoxes
 
-SimulationBoxes provides tools for dealing with periodic boundary conditions 
+MolecularBoxes provides tools for dealing with periodic boundary conditions 
 when analysing molecular simulations.
 
 For example, to create a rectangular box with periodic boundary conditions in 
 x, y and z start a Julia REPL and enter:
 ```julia
-julia> using SimulationBoxes
+julia> using MolecularBoxes
 
 julia> using StaticArrays
 

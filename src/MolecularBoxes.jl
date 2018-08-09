@@ -1,40 +1,40 @@
 
-module SimulationBoxes
+module MolecularBoxes
 
-export SimulationBox, Box
+export MolecularBox, Box
 export isperiodic separation center_of_mass
 
 using StaticArrays
 
 """
-SimulationBox has three type parameters:
+MolecularBox has three type parameters:
     * V: An immutable vector such as those implemented in the StaticArrays
         package
     * N: The number of dimensions
     * P: A tuple of booleans indicating which dimensions are periodic
 
-Concrete types inheriting from SimulationBox
+Concrete types inheriting from MolecularBox
 must implement 2 fields: vectors and lengths
  si(::Box)
 """
-abstract type SimulationBox{V,N,P} end
+abstract type MolecularBox{V,N,P} end
 
 include("center_of_mass.jl")
 
-@inline isperiodic(b::SimulationBox{V,N,P}) where {V,N,P} = P
-@inline isperiodic(b::SimulationBox{V,N,P}, dim) where {V,N,P} = P[dim]
+@inline isperiodic(b::MolecularBox{V,N,P}) where {V,N,P} = P
+@inline isperiodic(b::MolecularBox{V,N,P}, dim) where {V,N,P} = P[dim]
 
-@inline Base.eltype(::SimulationBox{V}) where V = V
+@inline Base.eltype(::MolecularBox{V}) where V = V
 
-struct Box{V,N,P} <: SimulationBox{V,N,P}
+struct Box{V,N,P} <: MolecularBox{V,N,P}
     vectors::NTuple{N,V}
     lengths::V
     function Box{V,N,P}(vectors::NTuple{N,V}) where {N,V,P}
         if !isa(N,Integer)
-            error("N parameter of a SimulationBox must be an Integer")
+            error("N parameter of a MolecularBox must be an Integer")
         end
         if !isa(P,NTuple{N,Bool})
-            error(string("P=$P parameter of a `SimulationBox` must be a tuple ",
+            error(string("P=$P parameter of a `MolecularBox` must be a tuple ",
                          "of `Bool`s, with one `Bool` for each dimension"))
         end
         for i in 1:N
@@ -99,7 +99,7 @@ end
 @inline function separation(
     x1,
     x2,
-    box::SimulationBox{V,N,P},
+    box::MolecularBox{V,N,P},
 ) where {V,N,P}
     _separation.(x1, x2, box.lengths, SVector(P))
 end
