@@ -1,5 +1,7 @@
 # MolecularBoxes.jl
 
+[![Build Status](https://travis-ci.org/tom--lee/MolecularBoxes.jl.svg?branch=master)](https://travis-ci.org/tom--lee/MolecularBoxes.jl)
+
 MolecularBoxes provides tools for dealing with periodic boundary conditions 
 when analysing molecular simulations.
 
