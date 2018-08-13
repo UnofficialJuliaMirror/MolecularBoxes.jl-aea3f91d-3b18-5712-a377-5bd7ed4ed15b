@@ -16,14 +16,17 @@ const BoxV =  Box{Vec,3,(true,true,true)}
     avectors = ([3.,0.,0.],
                 [0.,4.,0.],
                 [0.,0.,5.])
-    avectors2 = ([3.,0.],
-                 [0.,4.])
     ppp = (true,true,true)
     pp = (true,true)
     @test Box{Vec,3,ppp}(vectors) != nothing
     box = BoxV(vectors) 
     @test_throws MethodError Box{Vec,2,ppp}(vectors)
     @test_throws ErrorException Box{Vec,3,pp}(vectors)
+    @test_throws ErrorException Box{Vec,3,ppp}((
+        Vec(1,1,0),
+        Vec(0,2,0),
+        Vec(0,0,3),
+    ))
 
     @test BoxV(vectors) == Box(Vec(3,4,5))
 
@@ -61,6 +64,7 @@ end
 @testset "Test separation" begin
     @test separation(v1,v2,box) == Vec(1,-2,2)
     @test separation(v1,v2,boxppf) == Vec(1,-2,-3)
+    @test separation(v2,v1,boxppf) == Vec(-1,-2, 3)
     #@pending separation(need,more,tests) --> Vec(x,x,x)
     # especially for boundary cases
 end
