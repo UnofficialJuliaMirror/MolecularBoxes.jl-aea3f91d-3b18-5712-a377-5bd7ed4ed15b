@@ -1,5 +1,7 @@
 # MolecularBoxes.jl
 
+-[![Build Status](https://travis-ci.org/tom--lee/MolecularBoxes.jl.svg?branch=master)](https://travis-ci.org/tom--lee/MolecularBoxes.jl)
+
 MolecularBoxes provides tools for dealing with periodic boundary conditions 
 when analysing molecular simulations.
 
@@ -50,10 +52,10 @@ A box can also be defined with one or more fixed (ie non-periodic) boundaries
 in order to avoid applying the minimum image convention in that direction.
 
 ```julia
-julia> box_pfp = Box(box_edge_length, periodic=(false, true, false))
+julia> box_fpf = Box(box_edge_length, periodic=(false, true, false))
 Box{SArray{Tuple{3},Float64,1,3},3,(false, true, false)}(([3.0, 0.0, 0.0], [0.0, 4.0, 0.0], [0.0, 0.0, 5.0]), [3.0, 4.0, 5.0])
 
-julia> separation(v1, v2, box_pfp)
+julia> separation(v1, v2, box_fpf)
 3-element SArray{Tuple{3},Float64,1,3}:
  -2.8
   0.30000000000000027
