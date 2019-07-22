@@ -23,6 +23,19 @@ julia> box = Box(box_edge_length)
 Box{SArray{Tuple{3},Float64,1,3},3,(true, true, true)}(([3.0, 0.0, 0.0], [0.0, 4.0, 0.0], [0.0, 0.0, 5.0]), [3.0, 4.0, 5.0])
 ```
 
+The lengths of the sides of the boxes and the unit cell vectors can be accessed via the type fields:
+
+```julia
+julia> box.lengths
+3-element SArray{Tuple{3},Float64,1,3}:
+ 3.0
+ 4.0
+ 5.0
+
+julia> box.vectors
+([3.0, 0.0, 0.0], [0.0, 4.0, 0.0], [0.0, 0.0, 5.0])
+```
+
 To get the vector separating two points according to the nearest image 
 convention:
 
